@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import '../node_modules/react-vis/dist/style.css';
+import '../node_modules/highlight.js/styles/default.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
