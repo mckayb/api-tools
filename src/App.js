@@ -6,6 +6,10 @@ import {
   Link
 } from "react-router-dom";
 import Home from "./pages/Home"
+import "./App.css"
+import FlexContainer from "./assets/FlexContainer"
+import FlexColumn from "./assets/FlexColumn"
+import FlexRow from "./assets/FlexRow"
 
 // This site has 3 pages, all of which are rendered
 // dynamically in the browser (not server rendered).
@@ -19,40 +23,35 @@ import Home from "./pages/Home"
 export default function App() {
   return (
     <Router>
-      <div>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/about">About</Link>
-          </li>
-          <li>
-            <Link to="/dashboard">Dashboard</Link>
-          </li>
-        </ul>
-
-        <hr />
-
-        {/*
-          A <Switch> looks through all its children <Route>
-          elements and renders the first one whose path
-          matches the current URL. Use a <Switch> any time
-          you have multiple routes, but you want only one
-          of them to render at a time
-        */}
-        <Switch>
-          <Route exact path="/">
-            <Home />
-          </Route>
-          <Route path="/about">
-            <About />
-          </Route>
-          <Route path="/dashboard">
-            <Dashboard />
-          </Route>
-        </Switch>
-      </div>
+      <FlexContainer>
+        <FlexRow size={1}>
+          <FlexColumn size={1} style={{ "border-right": "1px solid red" }}>
+            <div><Link to="/">Home</Link></div>
+            <div><Link to="/about">About</Link></div>
+            <div><Link to="/dashboard">Dashboard</Link></div>
+          </FlexColumn>
+          <FlexRow size={5}>
+              {/*
+                A <Switch> looks through all its children <Route>
+                elements and renders the first one whose path
+                matches the current URL. Use a <Switch> any time
+                you have multiple routes, but you want only one
+                of them to render at a time
+              */}
+              <Switch>
+                <Route exact path="/">
+                  <Home />
+                </Route>
+                <Route path="/about">
+                  <About />
+                </Route>
+                <Route path="/dashboard">
+                  <Dashboard />
+                </Route>
+              </Switch>
+          </FlexRow>
+        </FlexRow>
+      </FlexContainer>
     </Router>
   );
 }

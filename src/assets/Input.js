@@ -11,6 +11,7 @@ const Input = styled.input.attrs(props => ({
   font-size: 1em;
   border: 2px solid palevioletred;
   border-radius: 3px;
+  width: 100%;
 
   /* here we use the dynamically computed prop */
   margin: ${props => props.size};
