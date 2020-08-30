@@ -65,11 +65,12 @@ export default function Home() {
       return <p>Error</p>
     } else if (data !== undefined) {
       return (
-        <div>
-          <Highlight languages={['json']}>
-            {JSON.stringify(data, null, 2) ?? '[]'}
-          </Highlight>
-        </div>
+        <Highlight languages={['json']} style={{
+          "width": "100%",
+          "margin-top": 0
+        }}>
+          {JSON.stringify(data, null, 2) ?? '[]'}
+        </Highlight>
       )
     } else {
       return (
@@ -112,9 +113,9 @@ export default function Home() {
           "margin": 0
         }} onClick={onRequestSubmitClick}>Submit</Button>
       </FlexRow>
-      <FlexColumn>
-        {results}
-      </FlexColumn>
+      <FlexRow size={1}>
+          {results}
+      </FlexRow>
     </FlexColumn>
   )
 }
