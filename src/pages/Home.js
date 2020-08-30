@@ -34,27 +34,28 @@ export default function Home() {
     name: "",
     value: ""
   }])
-  const onHeaderChange = i => header => {
+  /* const onHeaderChange = i => header => {
     const newHeaders = [...headers]
     newHeaders[i] = header
     setHeaders(newHeaders)
   }
   const onHeaderDelete = i => e => setHeaders(headers.filter((_, index) => i !== index))
-  const onHeaderAdd = e => setHeaders(headers.concat([{ name: "", value: "" }]))
+  const onHeaderAdd = e => setHeaders(headers.concat([{ name: "", value: "" }])) */
 
   const requestConfig = {
     url,
     method,
-    headers: headers.reduce((prev, curr) => ({ ...prev, [curr.name]: curr.value }), {})
+    headers: headers.reduce((prev, curr) => curr.name && curr.value ? ({ ...prev, [curr.name]: curr.value }) : prev, {})
   }
 
   const [{ data, loading, error, headers: reponseHeaders }, fetchUrl] = useAxios(requestConfig, { manual: true })
-  const onMakeRequestClick = e => url && fetchUrl()
+  console.log(data, error)
+  const onRequestSubmitClick = e => url && fetchUrl()
 
   // TODO: Allow them to specify keys, either by a string, or a JSON path
-  const [visualizations, setVisualizations] = useState([])
+  /* const [visualizations, setVisualizations] = useState([])
   const [toggleAddVisualization, setToggleAddVisualization] = useState(false)
-  const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization)
+  const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization) */
 
 
   const results = (() => {
@@ -102,9 +103,17 @@ export default function Home() {
           "margin-left": "-1em",
           "margin": 0
         }}></Input>
+        <Button type="button" style={{
+          "border-right": "none",
+          "border-top": "none",
+          "border-bottom": "none",
+          "border-top-left-radius": 0,
+          "border-bottom-left-radius": 0,
+          "margin": 0
+        }} onClick={onRequestSubmitClick}>Submit</Button>
       </FlexRow>
       <FlexColumn>
-        <div>Content</div>
+        {results}
       </FlexColumn>
     </FlexColumn>
   )
