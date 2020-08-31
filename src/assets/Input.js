@@ -1,21 +1,15 @@
 import styled from 'styled-components';
 
 const Input = styled.input.attrs(props => ({
-  // we can define static props
-  type: props.type || "text",
-
-  // or we can define dynamic ones
-  size: props.size || "1em",
+  type: props.type || "text"
 }))`
   color: palevioletred;
   font-size: 1em;
   border: 2px solid palevioletred;
   border-radius: 3px;
   width: 100%;
-
-  /* here we use the dynamically computed prop */
-  margin: ${props => props.size};
-  padding: ${props => props.size};
+  margin: 0;
+  padding: 1em;
 `;
 
 export default Input

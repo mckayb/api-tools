@@ -30,17 +30,29 @@ export default function Home() {
   const [url, setUrl] = useState("")
   const onUrlChange = e => setUrl(e.target.value)
 
+  const [inputOptions, setInputOptions] = useState([{
+    "label": "Headers",
+    "visible": true
+  }, {
+    "label": "Input",
+    "visible": false
+  }])
+  const onInputOptionClick = i => e => {
+    const newInputOptions = [...inputOptions].map(opt => ({...opt, visible: false}))
+    newInputOptions[i] = {...newInputOptions[i], visible: true}
+    setInputOptions(newInputOptions)
+  }
   const [headers, setHeaders] = useState([{
     name: "",
     value: ""
   }])
-  /* const onHeaderChange = i => header => {
+  const onHeaderChange = i => header => {
     const newHeaders = [...headers]
     newHeaders[i] = header
     setHeaders(newHeaders)
   }
   const onHeaderDelete = i => e => setHeaders(headers.filter((_, index) => i !== index))
-  const onHeaderAdd = e => setHeaders(headers.concat([{ name: "", value: "" }])) */
+  const onHeaderAdd = e => setHeaders(headers.concat([{ name: "", value: "" }]))
 
   const requestConfig = {
     url,
@@ -57,6 +69,18 @@ export default function Home() {
   const [toggleAddVisualization, setToggleAddVisualization] = useState(false)
   const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization) */
 
+  const visibleOption = inputOptions.find(opt => opt.visible)
+  const inputOptionContent = (() => {
+    if (visibleOption.label === "Headers") {
+      return (
+        <div>Headers</div>
+      )
+    } else if (visibleOption.label === "Input") {
+      return (
+        <div>Input</div>
+      )
+    }
+  })()
 
   const results = (() => {
     if (loading) {
@@ -84,10 +108,8 @@ export default function Home() {
       <FlexRow style={{ "border-bottom": "1px solid red" }}>
         <label for="requestMethodSelect" hidden="true">Method</label>
         <Select id="requestMethodSelect" onChange={onMethodChange} value={method} style={{
-          "margin": 0,
           "border": "none",
-          "border-top-right-radius": 0,
-          "border-bottom-right-radius": 0
+          "margin": 0
         }}>
           <option value="get">GET</option>
           <option value="post">POST</option>
@@ -98,20 +120,28 @@ export default function Home() {
         </Select>
         <label for="requestUrlInput" hidden="true">URL</label>
         <Input id="requestUrlInput" type="text" placeholder="http://example.com" value={url} onChange={onUrlChange} style={{
-          "border": "none",
-          "border-top-left-radius": 0,
-          "border-bottom-left-radius": 0,
-          "margin-left": "-1em",
-          "margin": 0
+          "border": "none"
         }}></Input>
         <Button type="button" style={{
           "border-right": "none",
           "border-top": "none",
-          "border-bottom": "none",
-          "border-top-left-radius": 0,
-          "border-bottom-left-radius": 0,
-          "margin": 0
+          "border-bottom": "none"
         }} onClick={onRequestSubmitClick}>Submit</Button>
+      </FlexRow>
+      <FlexRow style={{
+        "border-bottom": "2px solid palevioletred"
+      }}>
+        {inputOptions.map((option, i) => (
+          <Button key={i} type="button" style={{
+            "border-left": i === 0 ? "none" : "1px solid palevioletred",
+            "border-top": "none",
+            "border-bottom": "none",
+            "border-right": i === inputOptions.length - 1 ? "1px solid palevioletred" : "none"
+          }} onClick={onInputOptionClick(i)}>{option.label}</Button>
+        ))}
+      </FlexRow>
+      <FlexRow>
+        {inputOptionContent}
       </FlexRow>
       <FlexRow size={1}>
           {results}
