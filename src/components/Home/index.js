@@ -1,25 +1,36 @@
-import React, { useState } from "react"
-import Input from "../assets/Input"
-import Button from "../assets/Button"
-import Select from "../assets/Select"
+import React, { useState, useEffect } from "react"
+import Input from "../../assets/Input"
+import Button from "../../assets/Button"
+import Select from "../../assets/Select"
 import useAxios from "axios-hooks"
 import moment from "moment"
 import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis } from "react-vis"
 import { Highlight } from "react-fast-highlight"
-import FlexContainer from "../assets/FlexContainer"
-import FlexColumn from "../assets/FlexColumn"
-import FlexRow from "../assets/FlexRow"
+import FlexColumn from "../../assets/FlexColumn"
+import FlexRow from "../../assets/FlexRow"
+import useDynamicRefs from 'use-dynamic-refs';
 
-const Header = ({ header, onChange}) => (
+const Header = ({ header, index, onChange, onKeyDown, setRef }) => (
   <>
-    <label>
-      Name
-      <Input type="text" value={header.name} onChange={(e) => onChange({ name: e.target.value, value: header.value })}></Input>
-    </label>
-    <label>
-      Value
-      <Input type="text" value={header.value} onChange={(e) => onChange({ name: header.name, value: e.target.value })}></Input>
-    </label>
+    <label htmlFor={"header_" + index} hidden={true}>Name</label>
+    <Input id={"header_" + index}
+      type="text"
+      ref={setRef("header_" + index + "_0")}
+      value={header.name}
+      onChange={(e) => onChange({ name: e.target.value, value: header.value })}
+      onKeyDown={onKeyDown(0)}
+      placeholder="Header Name">
+    </Input>
+    &nbsp;
+    <label htmlFor={"header_" + index} hidden={true}>Value</label>
+    <Input id={"header_" + index}
+      type="text"
+      ref={setRef("header_" + index + "_1")}
+      value={header.value}
+      onChange={(e) => onChange({ name: header.name, value: e.target.value })}
+      placeholder="Header Value"
+      onKeyDown={onKeyDown(1)}>
+    </Input>
   </>
 )
 
@@ -31,17 +42,20 @@ export default function Home() {
   const onUrlChange = e => setUrl(e.target.value)
 
   const [inputOptions, setInputOptions] = useState([{
-    "label": "Headers",
-    "visible": true
+    label: "Headers",
+    visible: true
   }, {
-    "label": "Input",
-    "visible": false
+    label: "Input",
+    visible: false
   }])
   const onInputOptionClick = i => e => {
-    const newInputOptions = [...inputOptions].map(opt => ({...opt, visible: false}))
+    const newInputOptions = inputOptions.map(opt => ({...opt, visible: false}))
     newInputOptions[i] = {...newInputOptions[i], visible: true}
     setInputOptions(newInputOptions)
   }
+  const [getRef, setRef] = useDynamicRefs()
+
+  const [focusCoordinates, setFocusCoordinates] = useState([0, 0])
   const [headers, setHeaders] = useState([{
     name: "",
     value: ""
@@ -51,8 +65,31 @@ export default function Home() {
     newHeaders[i] = header
     setHeaders(newHeaders)
   }
-  const onHeaderDelete = i => e => setHeaders(headers.filter((_, index) => i !== index))
-  const onHeaderAdd = e => setHeaders(headers.concat([{ name: "", value: "" }]))
+  const onHeaderInputKeyDown = a => b => e => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.key === 'Tab' && e.preventDefault()
+
+      const isEmpty = e.target.value === "";
+      const newFocusCoordinates = b === 1
+        ? [isEmpty ? a : a + 1, isEmpty ? b : 0]
+        : [a, isEmpty ? b : b + 1];
+
+      b === 1 && !isEmpty && setHeaders(headers.concat([{ name: "", value: "" }]))
+      setFocusCoordinates(newFocusCoordinates)
+    } else if (e.key === 'Backspace' && e.target.value === "" && (a > 0 || b > 0)) {
+      const newFocusCoordinates = b === 1
+        ? [a, 0]
+        : [a === 0 ? 0 : a - 1, b + 1];
+
+      b === 0 && a !== 0 && setHeaders(headers.filter((_, index) => a !== index))
+      setFocusCoordinates(newFocusCoordinates)
+    }
+  }
+
+  useEffect(() => {
+    const { current: el } = getRef("header_" + focusCoordinates[0] + "_" + focusCoordinates[1])
+    el.focus()
+  }, [focusCoordinates])
 
   const requestConfig = {
     url,
@@ -60,8 +97,7 @@ export default function Home() {
     headers: headers.reduce((prev, curr) => curr.name && curr.value ? ({ ...prev, [curr.name]: curr.value }) : prev, {})
   }
 
-  const [{ data, loading, error, headers: reponseHeaders }, fetchUrl] = useAxios(requestConfig, { manual: true })
-  console.log(data, error)
+  const [{ data, loading, error, headers: responseHeaders }, fetchUrl] = useAxios(requestConfig, { manual: true })
   const onRequestSubmitClick = e => url && fetchUrl()
 
   // TODO: Allow them to specify keys, either by a string, or a JSON path
@@ -73,7 +109,21 @@ export default function Home() {
   const inputOptionContent = (() => {
     if (visibleOption.label === "Headers") {
       return (
-        <div>Headers</div>
+        <FlexColumn size={1} style={{ padding: "1em" }}>
+          <div>
+            Headers:
+          </div>
+          {headers.map((header, i) => (
+            <FlexRow key={i} size={1}>
+              <Header index={i}
+                header={header}
+                onChange={onHeaderChange(i)}
+                onKeyDown={onHeaderInputKeyDown(i)}
+                setRef={setRef}>
+              </Header>
+            </FlexRow>
+          ))}
+        </FlexColumn>
       )
     } else if (visibleOption.label === "Input") {
       return (
@@ -105,11 +155,11 @@ export default function Home() {
 
   return (
     <FlexColumn size={1}>
-      <FlexRow style={{ "border-bottom": "1px solid red" }}>
-        <label for="requestMethodSelect" hidden="true">Method</label>
+      <FlexRow style={{ borderBottom: "1px solid red" }}>
+        <label htmlFor="requestMethodSelect" hidden={true}>Method</label>
         <Select id="requestMethodSelect" onChange={onMethodChange} value={method} style={{
-          "border": "none",
-          "margin": 0
+          border: "none",
+          margin: 0
         }}>
           <option value="get">GET</option>
           <option value="post">POST</option>
@@ -118,25 +168,25 @@ export default function Home() {
           <option value="patch">PATCH</option>
           <option value="delete">DELETE</option>
         </Select>
-        <label for="requestUrlInput" hidden="true">URL</label>
+        <label htmlFor="requestUrlInput" hidden={true}>URL</label>
         <Input id="requestUrlInput" type="text" placeholder="http://example.com" value={url} onChange={onUrlChange} style={{
-          "border": "none"
+          border: "none"
         }}></Input>
         <Button type="button" style={{
-          "border-right": "none",
-          "border-top": "none",
-          "border-bottom": "none"
+          borderRight: "none",
+          borderTop: "none",
+          borderBottom: "none"
         }} onClick={onRequestSubmitClick}>Submit</Button>
       </FlexRow>
       <FlexRow style={{
-        "border-bottom": "2px solid palevioletred"
+        borderBottom: "2px solid palevioletred"
       }}>
         {inputOptions.map((option, i) => (
           <Button key={i} type="button" style={{
-            "border-left": i === 0 ? "none" : "1px solid palevioletred",
-            "border-top": "none",
-            "border-bottom": "none",
-            "border-right": i === inputOptions.length - 1 ? "1px solid palevioletred" : "none"
+            borderLeft: i === 0 ? "none" : "1px solid palevioletred",
+            borderTop: "none",
+            borderBottom: "none",
+            borderRight: i === inputOptions.length - 1 ? "1px solid palevioletred" : "none"
           }} onClick={onInputOptionClick(i)}>{option.label}</Button>
         ))}
       </FlexRow>

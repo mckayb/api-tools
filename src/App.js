@@ -5,7 +5,7 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import Home from "./pages/Home"
+import Home from "./components/Home"
 import "./App.css"
 import FlexContainer from "./assets/FlexContainer"
 import FlexColumn from "./assets/FlexColumn"
@@ -25,7 +25,7 @@ export default function App() {
     <Router>
       <FlexContainer>
         <FlexRow size={1}>
-          <FlexColumn size={1} style={{ "border-right": "1px solid red" }}>
+          <FlexColumn size={1} style={{ borderRight: "1px solid red" }}>
             <div><Link to="/">Home</Link></div>
             <div><Link to="/about">About</Link></div>
             <div><Link to="/dashboard">Dashboard</Link></div>
