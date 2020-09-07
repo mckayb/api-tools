@@ -3,36 +3,14 @@ import Input from "../../assets/Input"
 import Button from "../../assets/Button"
 import Select from "../../assets/Select"
 import useAxios from "axios-hooks"
-import moment from "moment"
-import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis } from "react-vis"
+// import moment from "moment"
+// import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis } from "react-vis"
 import { Highlight } from "react-fast-highlight"
 import FlexColumn from "../../assets/FlexColumn"
 import FlexRow from "../../assets/FlexRow"
 import useDynamicRefs from 'use-dynamic-refs';
+import KeyValueInputs from "../../assets/KeyValueInputs"
 
-const Header = ({ header, index, onChange, onKeyDown, setRef }) => (
-  <>
-    <label htmlFor={"header_" + index} hidden={true}>Name</label>
-    <Input id={"header_" + index}
-      type="text"
-      ref={setRef("header_" + index + "_0")}
-      value={header.name}
-      onChange={(e) => onChange({ name: e.target.value, value: header.value })}
-      onKeyDown={onKeyDown(0)}
-      placeholder="Header Name">
-    </Input>
-    &nbsp;
-    <label htmlFor={"header_" + index} hidden={true}>Value</label>
-    <Input id={"header_" + index}
-      type="text"
-      ref={setRef("header_" + index + "_1")}
-      value={header.value}
-      onChange={(e) => onChange({ name: header.name, value: e.target.value })}
-      placeholder="Header Value"
-      onKeyDown={onKeyDown(1)}>
-    </Input>
-  </>
-)
 
 export default function Home() {
   const [method, setMethod] = useState("get")
@@ -86,10 +64,46 @@ export default function Home() {
     }
   }
 
+  const [queryParamFocusCoordinates, setQueryParamFocusCoordinates] = useState([0, 0])
+  const [queryParams, setQueryParams] = useState([{
+    name: "",
+    value: ""
+  }])
+  const onQueryParamChange = i => qp => {
+    const newQueryParams = [...queryParams]
+    newQueryParams[i] = qp
+    setQueryParams(newQueryParams)
+  }
+  const onQueryParamInputKeyDown = a => b => e => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.key === 'Tab' && e.preventDefault()
+
+      const isEmpty = e.target.value === "";
+      const newFocusCoordinates = b === 1
+        ? [isEmpty ? a : a + 1, isEmpty ? b : 0]
+        : [a, isEmpty ? b : b + 1];
+
+      b === 1 && !isEmpty && setQueryParams(queryParams.concat([{ name: "", value: "" }]))
+      setQueryParamFocusCoordinates(newFocusCoordinates)
+    } else if (e.key === 'Backspace' && e.target.value === "" && (a > 0 || b > 0)) {
+      const newFocusCoordinates = b === 1
+        ? [a, 0]
+        : [a === 0 ? 0 : a - 1, b + 1];
+
+      b === 0 && a !== 0 && setQueryParams(queryParams.filter((_, index) => a !== index))
+      setQueryParamFocusCoordinates(newFocusCoordinates)
+    }
+  }
+
   useEffect(() => {
-    const { current: el } = getRef("header_" + focusCoordinates[0] + "_" + focusCoordinates[1])
-    el.focus()
-  }, [focusCoordinates])
+    const ref = getRef("header_" + focusCoordinates[0] + "_" + focusCoordinates[1])
+    ref && ref.current && ref.current.focus()
+  }, [focusCoordinates, getRef])
+
+  useEffect(() => {
+    const ref = getRef("query_param_" + queryParamFocusCoordinates[0] + "_" + queryParamFocusCoordinates[1])
+    ref && ref.current && ref.current.focus()
+  }, [queryParamFocusCoordinates, getRef])
 
   const requestConfig = {
     url,
@@ -115,19 +129,35 @@ export default function Home() {
           </div>
           {headers.map((header, i) => (
             <FlexRow key={i} size={1}>
-              <Header index={i}
-                header={header}
+              <KeyValueInputs name="header"
+                index={i}
+                pair={header}
                 onChange={onHeaderChange(i)}
                 onKeyDown={onHeaderInputKeyDown(i)}
                 setRef={setRef}>
-              </Header>
+              </KeyValueInputs>
             </FlexRow>
           ))}
         </FlexColumn>
       )
     } else if (visibleOption.label === "Input") {
       return (
-        <div>Input</div>
+        <FlexColumn size={1} style={{ padding: "1em" }}>
+          <div>
+            Query Parameters:
+          </div>
+          {queryParams.map((qp, i) => (
+            <FlexRow key={i} size={1}>
+              <KeyValueInputs name="query_param"
+                index={i}
+                pair={qp}
+                onChange={onQueryParamChange(i)}
+                onKeyDown={onQueryParamInputKeyDown(i)}
+                setRef={setRef}>
+              </KeyValueInputs>
+            </FlexRow>
+          ))}
+        </FlexColumn>
       )
     }
   })()
@@ -199,39 +229,7 @@ export default function Home() {
     </FlexColumn>
   )
 }
-    /*
-      <div>
-      </div>
-
-      <div>
-        Headers:
-        <Button type="text" onClick={onHeaderAdd}>Add Header</Button>
-        {headers.map((header, i) => (
-          <div key={i}>
-            <Header header={header} onChange={onHeaderChange(i)}></Header>
-            <Button type="text" onClick={onHeaderDelete(i)}>Delete</Button>
-          </div>
-        ))}
-      </div>
-
-      <Button type="text" onClick={onMakeRequestClick}>Make Request</Button>
-
-      <div>
-        Response:
-      </div>
-      <div>
-        {results}
-      </div>
-
-      {results && (
-        <div>
-          <Button type="text" onClick={onToggleAddVisClick}>Add Visualization</Button>
-          {visualizations.map(a => (
-            <div>Foo</div>
-          ))}
-        </div>
-      )}
-
+/*
       <div>
         <XYPlot height={600} width={600} xType="ordinal">
           <VerticalGridLines />
