@@ -19,18 +19,6 @@ export default function Home() {
   const [url, setUrl] = useState("")
   const onUrlChange = e => setUrl(e.target.value)
 
-  const [inputOptions, setInputOptions] = useState([{
-    label: "Headers",
-    visible: true
-  }, {
-    label: "Input",
-    visible: false
-  }])
-  const onInputOptionClick = i => e => {
-    const newInputOptions = inputOptions.map(opt => ({...opt, visible: false}))
-    newInputOptions[i] = {...newInputOptions[i], visible: true}
-    setInputOptions(newInputOptions)
-  }
   const [getRef, setRef] = useDynamicRefs()
 
   const [focusCoordinates, setFocusCoordinates] = useState([0, 0])
@@ -119,47 +107,41 @@ export default function Home() {
   const [toggleAddVisualization, setToggleAddVisualization] = useState(false)
   const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization) */
 
-  const visibleOption = inputOptions.find(opt => opt.visible)
-  const inputOptionContent = (() => {
-    if (visibleOption.label === "Headers") {
+  const pageContent = (() => {
       return (
-        <FlexColumn size={1} style={{ padding: "1em" }}>
-          <div>
-            Headers:
-          </div>
-          {headers.map((header, i) => (
-            <FlexRow key={i} size={1}>
-              <KeyValueInputs name="header"
-                index={i}
-                pair={header}
-                onChange={onHeaderChange(i)}
-                onKeyDown={onHeaderInputKeyDown(i)}
-                setRef={setRef}>
-              </KeyValueInputs>
-            </FlexRow>
-          ))}
-        </FlexColumn>
+        <>
+          <FlexColumn size={1} style={{ padding: "1em" }}>
+            <div>
+              Headers:
+            </div>
+            {headers.map((header, i) => (
+              <FlexRow key={i} size={1}>
+                <KeyValueInputs name="header"
+                  index={i}
+                  pair={header}
+                  onChange={onHeaderChange(i)}
+                  onKeyDown={onHeaderInputKeyDown(i)}
+                  setRef={setRef}>
+                </KeyValueInputs>
+              </FlexRow>
+            ))}
+            <div>
+              Query Parameters:
+            </div>
+            {queryParams.map((qp, i) => (
+              <FlexRow key={i} size={1}>
+                <KeyValueInputs name="query_param"
+                  index={i}
+                  pair={qp}
+                  onChange={onQueryParamChange(i)}
+                  onKeyDown={onQueryParamInputKeyDown(i)}
+                  setRef={setRef}>
+                </KeyValueInputs>
+              </FlexRow>
+            ))}
+          </FlexColumn>
+        </>
       )
-    } else if (visibleOption.label === "Input") {
-      return (
-        <FlexColumn size={1} style={{ padding: "1em" }}>
-          <div>
-            Query Parameters:
-          </div>
-          {queryParams.map((qp, i) => (
-            <FlexRow key={i} size={1}>
-              <KeyValueInputs name="query_param"
-                index={i}
-                pair={qp}
-                onChange={onQueryParamChange(i)}
-                onKeyDown={onQueryParamInputKeyDown(i)}
-                setRef={setRef}>
-              </KeyValueInputs>
-            </FlexRow>
-          ))}
-        </FlexColumn>
-      )
-    }
   })()
 
   const results = (() => {
@@ -208,20 +190,8 @@ export default function Home() {
           borderBottom: "none"
         }} onClick={onRequestSubmitClick}>Submit</Button>
       </FlexRow>
-      <FlexRow style={{
-        borderBottom: "2px solid palevioletred"
-      }}>
-        {inputOptions.map((option, i) => (
-          <Button key={i} type="button" style={{
-            borderLeft: i === 0 ? "none" : "1px solid palevioletred",
-            borderTop: "none",
-            borderBottom: "none",
-            borderRight: i === inputOptions.length - 1 ? "1px solid palevioletred" : "none"
-          }} onClick={onInputOptionClick(i)}>{option.label}</Button>
-        ))}
-      </FlexRow>
       <FlexRow>
-        {inputOptionContent}
+        {pageContent}
       </FlexRow>
       <FlexRow size={1}>
           {results}
