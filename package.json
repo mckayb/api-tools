@@ -12,6 +12,7 @@
     "jsonpath": "^1.0.2",
     "moment": "^2.27.0",
     "react": "^16.13.1",
+    "react-collapsible": "^2.8.0",
     "react-dom": "^16.13.1",
     "react-fast-highlight": "^4.0.0",
     "react-router-dom": "^5.2.0",
