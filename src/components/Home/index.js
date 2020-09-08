@@ -38,18 +38,16 @@ export default function Home() {
   const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization) */
 
   const requestOptionContent = (
-    <>
-      <FlexColumn size={1} style={{ padding: "1em" }}>
-        <Collapsible trigger="Headers" open={true}>
-          <KeyValueInputList name="headers" data={headers} setData={setHeaders}>
-          </KeyValueInputList>
-        </Collapsible>
-        <Collapsible trigger="Query Parameters" open={true}>
-          <KeyValueInputList name="query_params" data={queryParams} setData={setQueryParams}>
-          </KeyValueInputList>
-        </Collapsible>
-      </FlexColumn>
-    </>
+    <FlexColumn size={1} style={{ padding: "1em" }}>
+      <Collapsible trigger="Headers" open={true}>
+        <KeyValueInputList name="headers" data={headers} setData={setHeaders}>
+        </KeyValueInputList>
+      </Collapsible>
+      <Collapsible trigger="Query Parameters" open={true}>
+        <KeyValueInputList name="query_params" data={queryParams} setData={setQueryParams}>
+        </KeyValueInputList>
+      </Collapsible>
+    </FlexColumn>
   )
 
   const requestResults = (() => {
