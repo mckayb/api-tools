@@ -6,10 +6,10 @@ import {
   Link
 } from "react-router-dom";
 import Home from "./components/Home"
-import "./App.css"
-import FlexContainer from "./assets/FlexContainer"
-import FlexColumn from "./assets/FlexColumn"
-import FlexRow from "./assets/FlexRow"
+import "./App.scss"
+import FlexContainer from "./assets/js/FlexContainer"
+import FlexColumn from "./assets/js/FlexColumn"
+import FlexRow from "./assets/js/FlexRow"
 
 // This site has 3 pages, all of which are rendered
 // dynamically in the browser (not server rendered).

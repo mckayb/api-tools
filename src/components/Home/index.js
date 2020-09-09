@@ -1,15 +1,16 @@
 import React, { useState } from "react"
 import Collapsible from "react-collapsible"
-import Input from "../../assets/Input"
-import Button from "../../assets/Button"
-import Select from "../../assets/Select"
+import Input from "../../assets/js/Input"
+import Button from "../../assets/js/Button"
+import Select from "../../assets/js/Select"
 import useAxios from "axios-hooks"
 // import moment from "moment"
 // import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis } from "react-vis"
 import { Highlight } from "react-fast-highlight"
-import FlexColumn from "../../assets/FlexColumn"
-import FlexRow from "../../assets/FlexRow"
-import KeyValueInputList, { emptyList, reduceList } from "../../assets/KeyValueInputList"
+import FlexColumn from "../../assets/js/FlexColumn"
+import FlexRow from "../../assets/js/FlexRow"
+import KeyValueInputList, { emptyList, reduceList } from "../../assets/js/KeyValueInputList"
+import { mkTrigger } from "../../assets/js/Collapsible"
 
 
 export default function Home() {
@@ -38,12 +39,12 @@ export default function Home() {
   const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization) */
 
   const requestOptionContent = (
-    <FlexColumn size={1} style={{ padding: "1em" }}>
-      <Collapsible trigger="Headers" open={true}>
+    <FlexColumn size={1}>
+      <Collapsible trigger={mkTrigger("Headers")} open={true}>
         <KeyValueInputList name="headers" data={headers} setData={setHeaders}>
         </KeyValueInputList>
       </Collapsible>
-      <Collapsible trigger="Query Parameters" open={true}>
+      <Collapsible trigger={mkTrigger("Query Parameters")} open={true}>
         <KeyValueInputList name="query_params" data={queryParams} setData={setQueryParams}>
         </KeyValueInputList>
       </Collapsible>
