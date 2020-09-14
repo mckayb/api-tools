@@ -4,14 +4,15 @@ import Input from "../../assets/js/Input"
 import Button from "../../assets/js/Button"
 import Select from "../../assets/js/Select"
 import useAxios from "axios-hooks"
-// import moment from "moment"
-// import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis } from "react-vis"
+import moment from "moment"
+import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis, makeWidthFlexible } from "react-vis"
 import { Highlight } from "react-fast-highlight"
 import FlexColumn from "../../assets/js/FlexColumn"
 import FlexRow from "../../assets/js/FlexRow"
 import KeyValueInputList, { emptyList, reduceList } from "../../assets/js/KeyValueInputList"
 import { mkTrigger } from "../../assets/js/Collapsible"
 
+const FlexibleXYPlot = makeWidthFlexible(XYPlot)
 
 export default function Home() {
   const [method, setMethod] = useState("get")
@@ -29,21 +30,32 @@ export default function Home() {
     params: reduceList(queryParams),
     headers: reduceList(requestHeaders)
   }
-
   const [{ data, loading, error }, fetchUrl] = useAxios(requestConfig, { manual: true })
   const onRequestSubmitClick = e => url && fetchUrl()
 
-  // TODO: Allow them to specify keys, either by a string, or a JSON path
-  /* const [visualizations, setVisualizations] = useState([])
-  const [toggleAddVisualization, setToggleAddVisualization] = useState(false)
-  const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization) */
+  const [requestHeaderPaneOpen, setRequestHeaderPaneOpen] = useState(false)
+  const onRequestHeaderPaneOpen = e => setRequestHeaderPaneOpen(true)
+  const onRequestHeaderPaneClose = e => setRequestHeaderPaneOpen(false)
 
+  const [requestQueryParamPaneOpen, setRequestQueryParamPaneOpen] = useState(false)
+  const onRequestQueryParamPaneOpen = e => setRequestQueryParamPaneOpen(true)
+  const onRequestQueryParamPaneClose = e => setRequestQueryParamPaneOpen(false)
   const requestOptionContent = (
     <FlexColumn size={1}>
-      <KeyValueInputList name="Request Headers" data={requestHeaders} setData={setRequestHeaders}>
-      </KeyValueInputList>
-      <KeyValueInputList name="Query Parameters" data={queryParams} setData={setQueryParams}>
-      </KeyValueInputList>
+      <Collapsible open={requestHeaderPaneOpen}
+        trigger={mkTrigger(requestHeaderPaneOpen, "Request Headers")}
+        onTriggerClosing={onRequestHeaderPaneClose}
+        onTriggerOpening={onRequestHeaderPaneOpen}>
+          <KeyValueInputList name="Request Headers" data={requestHeaders} setData={setRequestHeaders}>
+          </KeyValueInputList>
+      </Collapsible>
+      <Collapsible open={requestQueryParamPaneOpen}
+        trigger={mkTrigger(requestQueryParamPaneOpen, "Query Parameters")}
+        onTriggerClosing={onRequestQueryParamPaneClose}
+        onTriggerOpening={onRequestQueryParamPaneOpen}>
+          <KeyValueInputList name="Query Parameters" data={queryParams} setData={setQueryParams}>
+          </KeyValueInputList>
+      </Collapsible>
     </FlexColumn>
   )
 
@@ -70,6 +82,94 @@ export default function Home() {
       {!data && !loading && !error && (
         <div className="text--muted" style={{ "padding": "1em" }}>Make a request...</div>
       )}
+    </Collapsible>
+  )
+
+  const [visualizations, setVisualizations] = useState([])
+  const [visualizationsPaneOpen, setVisualizationsPaneOpen] = useState(true)
+  const onVisualizationsPaneOpen = e => setVisualizationsPaneOpen(true)
+  const onVisualizationsPaneClose = e => setVisualizationsPaneOpen(false)
+
+  const handleVisualization = (vis, i) => {
+    if (vis.type === 'line') {
+      const seriesData = vis.series.map(series => data.map(row => ({ x: row[series.name], y: row[series.value] })))
+      return (
+        <>
+          {seriesData.map(series => (
+            <FlexRow key={i}>
+              <FlexibleXYPlot height={600} xType="ordinal">
+                <VerticalGridLines />
+                <HorizontalGridLines />
+                <XAxis tickFormat={a => moment(a).format('MMM DD')}/>
+                <YAxis/>
+                <LineSeries data={series}/>
+              </FlexibleXYPlot>
+            </FlexRow>
+          ))}
+        </>
+      )
+    } else {
+      return (
+        <div key={i}>Whoops, something went wrong and we were unable to draw the visualization.</div>
+      )
+    }
+  }
+
+  const visualizationResults = (
+    <Collapsible trigger={mkTrigger(visualizationsPaneOpen, "Visualizations")}
+      onTriggerOpening={onVisualizationsPaneOpen}
+      onTriggerClosing={onVisualizationsPaneClose}
+      open={visualizationsPaneOpen}>
+        {visualizations.length > 0 && data && (
+          <div>
+            {visualizations.map(handleVisualization)}
+          </div>
+        )}
+        {visualizations.length > 0 && !data && <div className="text--muted" style={{ "padding": "1em" }}>Make a request...</div>}
+        {visualizations.length === 0 && <div className="text--muted" style={{ "padding": "1em" }}>Add a Visualization...</div>}
+    </Collapsible>
+  )
+
+  const [newVisualization, setNewVisualization] = useState({
+    type: 'line',
+    series: emptyList
+  })
+  const onVisualizationTypeChange = e => setNewVisualization({...newVisualization, type: e.target.value})
+  const onVisualizationSeriesChange = series => setNewVisualization({ ...newVisualization, series })
+  const onVisualizationAddClick = e => setVisualizations(visualizations.concat([newVisualization]))
+  const contentByVisualizationType = (
+    <>
+      {newVisualization.type === "line" && (
+        <>
+          <KeyValueInputList data={newVisualization.series} setData={onVisualizationSeriesChange}>
+          </KeyValueInputList>
+          <div>
+            <Button type="submit" onClick={onVisualizationAddClick}>Add Visualization</Button>
+          </div>
+        </> 
+      )}
+    </>
+  )
+
+  const [newVisualizationPaneOpen, setNewVisualizationPaneOpen] = useState(false)
+  const onNewVisualizationPaneOpen = e => setNewVisualizationPaneOpen(true)
+  const onNewVisualizationPaneClose = e => setNewVisualizationPaneOpen(false)
+  const addNewVisualizationContent = (
+    <Collapsible trigger={mkTrigger(newVisualizationPaneOpen, "Add New Visualization")}
+      open={newVisualizationPaneOpen}
+      onTriggerOpening={onNewVisualizationPaneOpen}
+      onTriggerClosing={onNewVisualizationPaneClose}>
+        <FlexRow>
+          Visualization Type
+          <Select onChange={onVisualizationTypeChange} value={newVisualization.type} style={{ width: "100%", margin: 0}}>
+            <option value="line">Line</option>
+            <option value="bar">Bar</option>
+          </Select>
+        </FlexRow>
+        &nbsp;
+        <FlexRow>
+          {contentByVisualizationType}
+        </FlexRow>
     </Collapsible>
   )
 
@@ -105,7 +205,10 @@ export default function Home() {
         {requestResults}
       </FlexRow>
       <FlexRow>
-        Visualizations go here
+        {visualizationResults}
+      </FlexRow>
+      <FlexRow>
+        {addNewVisualizationContent}
       </FlexRow>
     </FlexColumn>
   )

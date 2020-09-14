@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react"
 import Input from "./Input"
 import FlexRow from "./FlexRow"
 import useDynamicRefs from 'use-dynamic-refs';
-import Collapsible from "react-collapsible"
-import { mkTrigger } from "../../assets/js/Collapsible"
 
 export const emptyList = [{ name: "", value: "" }]
 export const reduceList = data => data.reduce((prev, curr) => curr.name && curr.value ? ({ ...prev, [curr.name]: curr.value }) : prev, {})
@@ -62,20 +60,16 @@ export const KeyValueInputList = ({ name, data, setData }) => {
     }
   }
 
-  const [collapsed, setCollapsed] = useState(false)
-  const onOpen = e => setCollapsed(false)
-  const onClose = e => setCollapsed(true)
-
   useEffect(() => {
     const ref = getRef(name + "_" + focusCoordinates[0] + "_" + focusCoordinates[1])
     ref && ref.current && ref.current.focus()
   }, [focusCoordinates, getRef, name])
 
   return (
-    <Collapsible trigger={mkTrigger(!collapsed, name)} onTriggerOpening={onOpen} onTriggerClosing={onClose} open={!collapsed}>
+    <>
       {data.map((d, i) => (
         <FlexRow key={i} size={1}>
-          <KeyValueInputs key={i}
+          <KeyValueInputs
             name={name + "_" + i}
             pair={d}
             onChange={onChange(i)}
@@ -84,7 +78,7 @@ export const KeyValueInputList = ({ name, data, setData }) => {
           </KeyValueInputs>
         </FlexRow>
       ))}
-    </Collapsible>
+    </>
   )
 }
 export default KeyValueInputList
