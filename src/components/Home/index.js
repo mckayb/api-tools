@@ -20,17 +20,17 @@ export default function Home() {
   const [url, setUrl] = useState("")
   const onUrlChange = e => setUrl(e.target.value)
 
-  const [headers, setHeaders] = useState(emptyList);
+  const [requestHeaders, setRequestHeaders] = useState(emptyList);
   const [queryParams, setQueryParams] = useState(emptyList)
 
   const requestConfig = {
     url,
     method,
     params: reduceList(queryParams),
-    headers: reduceList(headers)
+    headers: reduceList(requestHeaders)
   }
 
-  const [{ data, loading, error, headers: responseHeaders }, fetchUrl] = useAxios(requestConfig, { manual: true })
+  const [{ data, loading, error }, fetchUrl] = useAxios(requestConfig, { manual: true })
   const onRequestSubmitClick = e => url && fetchUrl()
 
   // TODO: Allow them to specify keys, either by a string, or a JSON path
@@ -40,7 +40,7 @@ export default function Home() {
 
   const requestOptionContent = (
     <FlexColumn size={1}>
-      <KeyValueInputList name="Request Headers" data={headers} setData={setHeaders}>
+      <KeyValueInputList name="Request Headers" data={requestHeaders} setData={setRequestHeaders}>
       </KeyValueInputList>
       <KeyValueInputList name="Query Parameters" data={queryParams} setData={setQueryParams}>
       </KeyValueInputList>
@@ -68,7 +68,7 @@ export default function Home() {
         </Highlight>
       )}
       {!data && !loading && !error && (
-        <div class="text--muted" style={{ "padding": "1em" }}>Make a request...</div>
+        <div className="text--muted" style={{ "padding": "1em" }}>Make a request...</div>
       )}
     </Collapsible>
   )
