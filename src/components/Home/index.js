@@ -213,14 +213,3 @@ export default function Home() {
     </FlexColumn>
   )
 }
-/*
-      <div>
-        <XYPlot height={600} width={600} xType="ordinal">
-          <VerticalGridLines />
-          <HorizontalGridLines />
-          <XAxis tickFormat={a => moment(a).format('MMM DD')}/>
-          <YAxis/>
-          <LineSeries data={visualizationData} />
-        </XYPlot>
-      </div>
-    */
