@@ -1,3 +1,8 @@
+$base: blue;
+$lightGrey: lightgrey;
+$grey: grey;
+$cyan: cyan;
+
 .App {
   min-height: 100%;
 }
@@ -15,12 +20,14 @@
 
 .highlighted {
   width: 100%;
-  margin: 1em;
 }
 
-$base: blue;
-$lightGrey: lightgrey;
-$grey: grey;
-$cyan: cyan;
+pre {
+  margin: 0;
+}
 
-// @import "assets/css/Collapsible.scss"
+.text--muted {
+  color: $grey;
+}
+
+@import "assets/css/Collapsible.scss"

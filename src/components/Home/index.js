@@ -40,39 +40,38 @@ export default function Home() {
 
   const requestOptionContent = (
     <FlexColumn size={1}>
-      <Collapsible trigger={mkTrigger("Headers")} open={true}>
-        <KeyValueInputList name="headers" data={headers} setData={setHeaders}>
-        </KeyValueInputList>
-      </Collapsible>
-      <Collapsible trigger={mkTrigger("Query Parameters")} open={true}>
-        <KeyValueInputList name="query_params" data={queryParams} setData={setQueryParams}>
-        </KeyValueInputList>
-      </Collapsible>
+      <KeyValueInputList name="Request Headers" data={headers} setData={setHeaders}>
+      </KeyValueInputList>
+      <KeyValueInputList name="Query Parameters" data={queryParams} setData={setQueryParams}>
+      </KeyValueInputList>
     </FlexColumn>
   )
 
-  const requestResults = (() => {
-    if (loading) {
-      return <p>Loading</p>
-    } else if (error) {
-      return <p>Error</p>
-    } else if (data !== undefined) {
-      return (
-        <Collapsible className="highlighted" openedClassName="highlighted" trigger="Response" open={true}>
-          <Highlight languages={['json']} style={{
-            width: "100%",
-            margin: "1em"
-          }}>
-            {JSON.stringify(data, null, 2) ?? '[]'}
-          </Highlight>
-        </Collapsible>
-      )
-    } else {
-      return (
-        <div></div>
-      )
-    }
-  })()
+  const [responsePaneOpen, setResponsePaneOpen] = useState(true)
+  const onResponsePaneOpen = e => setResponsePaneOpen(true)
+  const onResponsePaneClose = e => setResponsePaneOpen(false)
+  const requestResults = (
+    <Collapsible className="highlighted"
+      openedClassName="highlighted"
+      trigger={mkTrigger(responsePaneOpen, "Response")}
+      onTriggerOpening={onResponsePaneOpen}
+      onTriggerClosing={onResponsePaneClose}
+      open={responsePaneOpen}>
+      {loading && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+      {data && !loading && !error && (
+        <Highlight languages={['json']} style={{
+          width: "100%",
+          margin: "1em"
+        }}>
+          {JSON.stringify(data, null, 2) ?? '[]'}
+        </Highlight>
+      )}
+      {!data && !loading && !error && (
+        <div class="text--muted" style={{ "padding": "1em" }}>Make a request...</div>
+      )}
+    </Collapsible>
+  )
 
   return (
     <FlexColumn size={1}>
