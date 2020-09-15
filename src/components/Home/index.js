@@ -90,23 +90,31 @@ export default function Home() {
   const onVisualizationsPaneOpen = e => setVisualizationsPaneOpen(true)
   const onVisualizationsPaneClose = e => setVisualizationsPaneOpen(false)
 
+  const newData = [{
+    sales: 100,
+    units: 25,
+    date: "2019-10-06"
+  }, {
+    sales: 97,
+    units: 34,
+    date: "2019-10-13"
+  }]
   const handleVisualization = (vis, i) => {
     if (vis.type === 'line') {
-      const seriesData = vis.series.map(series => data.map(row => ({ x: row[series.name], y: row[series.value] })))
+      // const seriesData = vis.series.map(series => data.map(row => ({ x: row[series.name], y: row[series.value] })))
+      const seriesData = vis.series.map(series => newData.map(row => ({ x: row[series.name], y: row[series.value] })))
       return (
-        <>
-          {seriesData.map(series => (
-            <FlexRow key={i}>
-              <FlexibleXYPlot height={600} xType="ordinal">
-                <VerticalGridLines />
-                <HorizontalGridLines />
-                <XAxis tickFormat={a => moment(a).format('MMM DD')}/>
-                <YAxis/>
-                <LineSeries data={series}/>
-              </FlexibleXYPlot>
-            </FlexRow>
-          ))}
-        </>
+        <FlexColumn key={i}>
+          <FlexibleXYPlot height={600} xType="ordinal">
+            <VerticalGridLines />
+            <HorizontalGridLines />
+            <XAxis tickFormat={a => moment(a).format('MMM DD')}/>
+            <YAxis/>
+            {seriesData.map(series => (
+              <LineSeries data={series}/>
+            ))}
+          </FlexibleXYPlot>
+        </FlexColumn>
       )
     } else {
       return (
@@ -121,9 +129,9 @@ export default function Home() {
       onTriggerClosing={onVisualizationsPaneClose}
       open={visualizationsPaneOpen}>
         {visualizations.length > 0 && data && (
-          <div>
+          <>
             {visualizations.map(handleVisualization)}
-          </div>
+          </>
         )}
         {visualizations.length > 0 && !data && <div className="text--muted" style={{ "padding": "1em" }}>Make a request...</div>}
         {visualizations.length === 0 && <div className="text--muted" style={{ "padding": "1em" }}>Add a Visualization...</div>}
@@ -140,13 +148,13 @@ export default function Home() {
   const contentByVisualizationType = (
     <>
       {newVisualization.type === "line" && (
-        <>
+        <FlexColumn size={1}>
           <KeyValueInputList data={newVisualization.series} setData={onVisualizationSeriesChange}>
           </KeyValueInputList>
-          <div>
+          <FlexRow style={{ flexDirection: "row-reverse"}}>
             <Button type="submit" onClick={onVisualizationAddClick}>Add Visualization</Button>
-          </div>
-        </> 
+          </FlexRow>
+        </FlexColumn>
       )}
     </>
   )
