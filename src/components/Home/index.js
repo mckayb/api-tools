@@ -11,6 +11,7 @@ import FlexColumn from "../../assets/js/FlexColumn"
 import FlexRow from "../../assets/js/FlexRow"
 import KeyValueInputList, { emptyList, reduceList } from "../../assets/js/KeyValueInputList"
 import { mkTrigger } from "../../assets/js/Collapsible"
+import jsonPath from "jsonpath"
 
 const FlexibleXYPlot = makeWidthFlexible(XYPlot)
 
@@ -101,8 +102,14 @@ export default function Home() {
   }]
   const handleVisualization = (vis, i) => {
     if (vis.type === 'line') {
-      // const seriesData = vis.series.map(series => data.map(row => ({ x: row[series.name], y: row[series.value] })))
-      const seriesData = vis.series.map(series => newData.map(row => ({ x: row[series.name], y: row[series.value] })))
+      // Just keys
+      // const seriesData = vis.series.map(series => newData.map(row => ({ x: row[series.name], y: row[series.value] })))
+
+      // Json Path stuff
+      const zipWith = f => (as, bs) => as.map((val, i) => f(val, bs[i]))
+      const zipToSeries = zipWith((x, y) => ({ x, y }))
+      const seriesData = vis.series.map(series => zipToSeries(jsonPath.query(newData, series.name), jsonPath.query(newData, series.value)))
+
       return (
         <FlexColumn key={i}>
           <FlexibleXYPlot height={600} xType="ordinal">
@@ -110,8 +117,8 @@ export default function Home() {
             <HorizontalGridLines />
             <XAxis tickFormat={a => moment(a).format('MMM DD')}/>
             <YAxis/>
-            {seriesData.map(series => (
-              <LineSeries data={series}/>
+            {seriesData.map((series, j) => (
+              <LineSeries key={j} data={series}/>
             ))}
           </FlexibleXYPlot>
         </FlexColumn>
