@@ -20,6 +20,10 @@
   }
 }
 
+.Collapsible__contentInner--no-padding {
+  padding: 0;
+}
+
 //The link which when clicked opens the collapsable area
 .Collapsible__trigger {
   display: block;

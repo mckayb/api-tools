@@ -81,14 +81,14 @@ export default function About() {
       <FlexRow>
         <Collapsible open={model.responsePaneOpen}
           trigger={mkTrigger(model.responsePaneOpen, "Response")}
+          contentInnerClassName="Collapsible__contentInner--no-padding"
           onTriggerClosing={actions.onResponsePaneClose}
           onTriggerOpening={actions.onResponsePaneOpen}>
             {loading && <div>Loading...</div>}
             {error && !loading && <div>Error...</div>}
             {data && !loading && !error && (
               <Highlight languages={['json']} style={{
-                width: "100%",
-                margin: "1em"
+                width: "100%"
               }}>
                 {JSON.stringify(data, null, 2) ?? '[]'}
               </Highlight>
