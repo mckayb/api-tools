@@ -4,7 +4,7 @@ import Input from "../../assets/js/Input"
 import Button from "../../assets/js/Button"
 import Select from "../../assets/js/Select"
 import useAxios from "axios-hooks"
-import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis, makeWidthFlexible } from "react-vis"
+import { XYPlot, LineSeries, VerticalBarSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis, makeWidthFlexible } from "react-vis"
 import { Highlight } from "react-fast-highlight"
 import FlexColumn from "../../assets/js/FlexColumn"
 import FlexRow from "../../assets/js/FlexRow"
@@ -100,43 +100,44 @@ export default function Home() {
     date: "2019-10-13"
   }]
   const handleVisualization = (vis, i) => {
-    if (vis.type === 'line') {
-      const parseInput = (userInput) => {
-        try {
-          const jsonPathResults = jsonPath.query(newData, userInput)
-          return jsonPathResults.length === 0
-            ? newData.map(row => row[userInput])
-                .filter(a => a !== undefined)
-            : jsonPathResults;
-        } catch (e) {
-          return newData.map(row => row[userInput])
-            .filter(a => a !== undefined)
-        }
+    const parseInput = (userInput) => {
+      try {
+        const jsonPathResults = jsonPath.query(newData, userInput)
+        return jsonPathResults.length === 0
+          ? newData.map(row => row[userInput])
+              .filter(a => a !== undefined)
+          : jsonPathResults;
+      } catch (e) {
+        return newData.map(row => row[userInput])
+          .filter(a => a !== undefined)
       }
-
-      const zipWith = f => (as, bs) => as.map((a, i) => f(a, bs[i]))
-      const zipToSeries = zipWith((x, y) => ({ x, y }))
-      const parseSeries = (series) => zipToSeries(parseInput(series.name), parseInput(series.value))
-      const seriesData = vis.series.map(parseSeries).filter(x => x.length > 0)
-
-      return (
-        <FlexColumn key={i}>
-          <FlexibleXYPlot height={600} xType="ordinal">
-            <VerticalGridLines />
-            <HorizontalGridLines />
-            <XAxis/>
-            <YAxis/>
-            {seriesData.map((series, j) => (
-              <LineSeries key={j} data={series}/>
-            ))}
-          </FlexibleXYPlot>
-        </FlexColumn>
-      )
-    } else {
-      return (
-        <div key={i}>Whoops, something went wrong and we were unable to draw the visualization.</div>
-      )
     }
+    const zipWith = f => (as, bs) => as.map((a, i) => f(a, bs[i]))
+    const zipToSeries = zipWith((x, y) => ({ x, y }))
+    const parseSeries = (series) => zipToSeries(parseInput(series.name), parseInput(series.value))
+    const seriesData = vis.series.map(parseSeries)
+      .filter(x => x.length > 0)
+      .map((series, j) => {
+        if (vis.type === 'line') {
+          return <LineSeries key={j} data={series}/>
+        } else if (vis.type === 'bar') {
+          return <VerticalBarSeries key={j} data={series}/>
+        } else {
+          return <div>Foo</div>
+        }
+      })
+
+    return (
+      <FlexColumn key={i}>
+        <FlexibleXYPlot height={600} xType="ordinal">
+          <VerticalGridLines />
+          <HorizontalGridLines />
+          <XAxis/>
+          <YAxis/>
+          {seriesData}
+        </FlexibleXYPlot>
+      </FlexColumn>
+    )
   }
 
   const visualizationResults = (
@@ -164,6 +165,15 @@ export default function Home() {
   const contentByVisualizationType = (
     <>
       {newVisualization.type === "line" && (
+        <FlexColumn size={1}>
+          <KeyValueInputList data={newVisualization.series} setData={onVisualizationSeriesChange}>
+          </KeyValueInputList>
+          <FlexRow style={{ flexDirection: "row-reverse"}}>
+            <Button type="submit" onClick={onVisualizationAddClick}>Add Visualization</Button>
+          </FlexRow>
+        </FlexColumn>
+      )}
+      {newVisualization.type === "bar" && (
         <FlexColumn size={1}>
           <KeyValueInputList data={newVisualization.series} setData={onVisualizationSeriesChange}>
           </KeyValueInputList>
