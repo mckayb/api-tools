@@ -163,26 +163,13 @@ export default function Home() {
   const onVisualizationSeriesChange = series => setNewVisualization({ ...newVisualization, series })
   const onVisualizationAddClick = e => setVisualizations(visualizations.concat([newVisualization]))
   const contentByVisualizationType = (
-    <>
-      {newVisualization.type === "line" && (
-        <FlexColumn size={1}>
-          <KeyValueInputList data={newVisualization.series} setData={onVisualizationSeriesChange}>
-          </KeyValueInputList>
-          <FlexRow style={{ flexDirection: "row-reverse"}}>
-            <Button type="submit" onClick={onVisualizationAddClick}>Add Visualization</Button>
-          </FlexRow>
-        </FlexColumn>
-      )}
-      {newVisualization.type === "bar" && (
-        <FlexColumn size={1}>
-          <KeyValueInputList data={newVisualization.series} setData={onVisualizationSeriesChange}>
-          </KeyValueInputList>
-          <FlexRow style={{ flexDirection: "row-reverse"}}>
-            <Button type="submit" onClick={onVisualizationAddClick}>Add Visualization</Button>
-          </FlexRow>
-        </FlexColumn>
-      )}
-    </>
+    <FlexColumn size={1}>
+      <KeyValueInputList data={newVisualization.series} setData={onVisualizationSeriesChange}>
+      </KeyValueInputList>
+      <FlexRow style={{ flexDirection: "row-reverse"}}>
+        <Button type="submit" onClick={onVisualizationAddClick}>Add Visualization</Button>
+      </FlexRow>
+    </FlexColumn>
   )
 
   const [newVisualizationPaneOpen, setNewVisualizationPaneOpen] = useState(false)

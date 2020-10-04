@@ -1,12 +1,8 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link
-} from "react-router-dom";
-import Home from "./components/Home"
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import "./App.scss"
+import Home from "./components/Home"
+import About from "./components/About"
 import FlexContainer from "./assets/js/FlexContainer"
 import FlexColumn from "./assets/js/FlexColumn"
 import FlexRow from "./assets/js/FlexRow"
@@ -56,16 +52,6 @@ export default function App() {
   );
 }
 
-// You can think of these components as "pages"
-// in your app.
-
-function About() {
-  return (
-    <div>
-      <h2>About</h2>
-    </div>
-  );
-}
 
 function Dashboard() {
   return (

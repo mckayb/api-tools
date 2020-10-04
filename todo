@@ -1,2 +1,6 @@
 Handle Bar Charts, and Pie Charts
 Handle JSON Path inputs, rather than relying on keys in a flat array
+
+
+Be able to handle multiple requests?
+When the response comes in, can I generate a schema from it?
