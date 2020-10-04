@@ -1,3 +1,8 @@
+$base: blue;
+$lightGrey: lightgrey;
+$grey: grey;
+$cyan: cyan;
+
 .App {
   min-height: 100%;
 }
@@ -12,3 +17,17 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+
+.highlighted {
+  width: 100%;
+}
+
+pre {
+  margin: 0;
+}
+
+.text--muted {
+  color: $grey;
+}
+
+@import "assets/css/Collapsible.scss"

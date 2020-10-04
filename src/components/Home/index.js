@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react"
-import Input from "../../assets/Input"
-import Button from "../../assets/Button"
-import Select from "../../assets/Select"
+import React, { useState } from "react"
+import Collapsible from "react-collapsible"
+import Input from "../../assets/js/Input"
+import Button from "../../assets/js/Button"
+import Select from "../../assets/js/Select"
 import useAxios from "axios-hooks"
 // import moment from "moment"
 // import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis } from "react-vis"
 import { Highlight } from "react-fast-highlight"
-import FlexColumn from "../../assets/FlexColumn"
-import FlexRow from "../../assets/FlexRow"
-import useDynamicRefs from 'use-dynamic-refs';
-import KeyValueInputs from "../../assets/KeyValueInputs"
+import FlexColumn from "../../assets/js/FlexColumn"
+import FlexRow from "../../assets/js/FlexRow"
+import KeyValueInputList, { emptyList, reduceList } from "../../assets/js/KeyValueInputList"
+import { mkTrigger } from "../../assets/js/Collapsible"
 
 
 export default function Home() {
@@ -19,87 +20,17 @@ export default function Home() {
   const [url, setUrl] = useState("")
   const onUrlChange = e => setUrl(e.target.value)
 
-  const [getRef, setRef] = useDynamicRefs()
-
-  const [focusCoordinates, setFocusCoordinates] = useState([0, 0])
-  const [headers, setHeaders] = useState([{
-    name: "",
-    value: ""
-  }])
-  const onHeaderChange = i => header => {
-    const newHeaders = [...headers]
-    newHeaders[i] = header
-    setHeaders(newHeaders)
-  }
-  const onHeaderInputKeyDown = a => b => e => {
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      e.key === 'Tab' && e.preventDefault()
-
-      const isEmpty = e.target.value === "";
-      const newFocusCoordinates = b === 1
-        ? [isEmpty ? a : a + 1, isEmpty ? b : 0]
-        : [a, isEmpty ? b : b + 1];
-
-      b === 1 && !isEmpty && setHeaders(headers.concat([{ name: "", value: "" }]))
-      setFocusCoordinates(newFocusCoordinates)
-    } else if (e.key === 'Backspace' && e.target.value === "" && (a > 0 || b > 0)) {
-      const newFocusCoordinates = b === 1
-        ? [a, 0]
-        : [a === 0 ? 0 : a - 1, b + 1];
-
-      b === 0 && a !== 0 && setHeaders(headers.filter((_, index) => a !== index))
-      setFocusCoordinates(newFocusCoordinates)
-    }
-  }
-
-  const [queryParamFocusCoordinates, setQueryParamFocusCoordinates] = useState([0, 0])
-  const [queryParams, setQueryParams] = useState([{
-    name: "",
-    value: ""
-  }])
-  const onQueryParamChange = i => qp => {
-    const newQueryParams = [...queryParams]
-    newQueryParams[i] = qp
-    setQueryParams(newQueryParams)
-  }
-  const onQueryParamInputKeyDown = a => b => e => {
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      e.key === 'Tab' && e.preventDefault()
-
-      const isEmpty = e.target.value === "";
-      const newFocusCoordinates = b === 1
-        ? [isEmpty ? a : a + 1, isEmpty ? b : 0]
-        : [a, isEmpty ? b : b + 1];
-
-      b === 1 && !isEmpty && setQueryParams(queryParams.concat([{ name: "", value: "" }]))
-      setQueryParamFocusCoordinates(newFocusCoordinates)
-    } else if (e.key === 'Backspace' && e.target.value === "" && (a > 0 || b > 0)) {
-      const newFocusCoordinates = b === 1
-        ? [a, 0]
-        : [a === 0 ? 0 : a - 1, b + 1];
-
-      b === 0 && a !== 0 && setQueryParams(queryParams.filter((_, index) => a !== index))
-      setQueryParamFocusCoordinates(newFocusCoordinates)
-    }
-  }
-
-  useEffect(() => {
-    const ref = getRef("header_" + focusCoordinates[0] + "_" + focusCoordinates[1])
-    ref && ref.current && ref.current.focus()
-  }, [focusCoordinates, getRef])
-
-  useEffect(() => {
-    const ref = getRef("query_param_" + queryParamFocusCoordinates[0] + "_" + queryParamFocusCoordinates[1])
-    ref && ref.current && ref.current.focus()
-  }, [queryParamFocusCoordinates, getRef])
+  const [requestHeaders, setRequestHeaders] = useState(emptyList);
+  const [queryParams, setQueryParams] = useState(emptyList)
 
   const requestConfig = {
     url,
     method,
-    headers: headers.reduce((prev, curr) => curr.name && curr.value ? ({ ...prev, [curr.name]: curr.value }) : prev, {})
+    params: reduceList(queryParams),
+    headers: reduceList(requestHeaders)
   }
 
-  const [{ data, loading, error, headers: responseHeaders }, fetchUrl] = useAxios(requestConfig, { manual: true })
+  const [{ data, loading, error }, fetchUrl] = useAxios(requestConfig, { manual: true })
   const onRequestSubmitClick = e => url && fetchUrl()
 
   // TODO: Allow them to specify keys, either by a string, or a JSON path
@@ -107,63 +38,40 @@ export default function Home() {
   const [toggleAddVisualization, setToggleAddVisualization] = useState(false)
   const onToggleAddVisClick = e => setToggleAddVisualization(!toggleAddVisualization) */
 
-  const pageContent = (() => {
-      return (
-        <>
-          <FlexColumn size={1} style={{ padding: "1em" }}>
-            <div>
-              Headers:
-            </div>
-            {headers.map((header, i) => (
-              <FlexRow key={i} size={1}>
-                <KeyValueInputs name="header"
-                  index={i}
-                  pair={header}
-                  onChange={onHeaderChange(i)}
-                  onKeyDown={onHeaderInputKeyDown(i)}
-                  setRef={setRef}>
-                </KeyValueInputs>
-              </FlexRow>
-            ))}
-            <div>
-              Query Parameters:
-            </div>
-            {queryParams.map((qp, i) => (
-              <FlexRow key={i} size={1}>
-                <KeyValueInputs name="query_param"
-                  index={i}
-                  pair={qp}
-                  onChange={onQueryParamChange(i)}
-                  onKeyDown={onQueryParamInputKeyDown(i)}
-                  setRef={setRef}>
-                </KeyValueInputs>
-              </FlexRow>
-            ))}
-          </FlexColumn>
-        </>
-      )
-  })()
+  const requestOptionContent = (
+    <FlexColumn size={1}>
+      <KeyValueInputList name="Request Headers" data={requestHeaders} setData={setRequestHeaders}>
+      </KeyValueInputList>
+      <KeyValueInputList name="Query Parameters" data={queryParams} setData={setQueryParams}>
+      </KeyValueInputList>
+    </FlexColumn>
+  )
 
-  const results = (() => {
-    if (loading) {
-      return <p>Loading</p>
-    } else if (error) {
-      return <p>Error</p>
-    } else if (data !== undefined) {
-      return (
+  const [responsePaneOpen, setResponsePaneOpen] = useState(true)
+  const onResponsePaneOpen = e => setResponsePaneOpen(true)
+  const onResponsePaneClose = e => setResponsePaneOpen(false)
+  const requestResults = (
+    <Collapsible className="highlighted"
+      openedClassName="highlighted"
+      trigger={mkTrigger(responsePaneOpen, "Response")}
+      onTriggerOpening={onResponsePaneOpen}
+      onTriggerClosing={onResponsePaneClose}
+      open={responsePaneOpen}>
+      {loading && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+      {data && !loading && !error && (
         <Highlight languages={['json']} style={{
-          "width": "100%",
-          "margin-top": 0
+          width: "100%",
+          margin: "1em"
         }}>
           {JSON.stringify(data, null, 2) ?? '[]'}
         </Highlight>
-      )
-    } else {
-      return (
-        <div></div>
-      )
-    }
-  })()
+      )}
+      {!data && !loading && !error && (
+        <div className="text--muted" style={{ "padding": "1em" }}>Make a request...</div>
+      )}
+    </Collapsible>
+  )
 
   return (
     <FlexColumn size={1}>
@@ -191,10 +99,13 @@ export default function Home() {
         }} onClick={onRequestSubmitClick}>Submit</Button>
       </FlexRow>
       <FlexRow>
-        {pageContent}
+        {requestOptionContent}
       </FlexRow>
-      <FlexRow size={1}>
-          {results}
+      <FlexRow>
+        {requestResults}
+      </FlexRow>
+      <FlexRow>
+        Visualizations go here
       </FlexRow>
     </FlexColumn>
   )
