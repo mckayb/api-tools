@@ -4,13 +4,13 @@ import Input from "../../assets/js/Input"
 import Button from "../../assets/js/Button"
 import Select from "../../assets/js/Select"
 import useAxios from "axios-hooks"
-import moment from "moment"
 import { XYPlot, LineSeries, VerticalGridLines, HorizontalGridLines, XAxis, YAxis, makeWidthFlexible } from "react-vis"
 import { Highlight } from "react-fast-highlight"
 import FlexColumn from "../../assets/js/FlexColumn"
 import FlexRow from "../../assets/js/FlexRow"
 import KeyValueInputList, { emptyList, reduceList } from "../../assets/js/KeyValueInputList"
 import { mkTrigger } from "../../assets/js/Collapsible"
+import jsonPath from "jsonpath"
 
 const FlexibleXYPlot = makeWidthFlexible(XYPlot)
 
@@ -101,17 +101,33 @@ export default function Home() {
   }]
   const handleVisualization = (vis, i) => {
     if (vis.type === 'line') {
-      // const seriesData = vis.series.map(series => data.map(row => ({ x: row[series.name], y: row[series.value] })))
-      const seriesData = vis.series.map(series => newData.map(row => ({ x: row[series.name], y: row[series.value] })))
+      const parseInput = (userInput) => {
+        try {
+          const jsonPathResults = jsonPath.query(newData, userInput)
+          return jsonPathResults.length === 0
+            ? newData.map(row => row[userInput])
+                .filter(a => a !== undefined)
+            : jsonPathResults;
+        } catch (e) {
+          return newData.map(row => row[userInput])
+            .filter(a => a !== undefined)
+        }
+      }
+
+      const zipWith = f => (as, bs) => as.map((a, i) => f(a, bs[i]))
+      const zipToSeries = zipWith((x, y) => ({ x, y }))
+      const parseSeries = (series) => zipToSeries(parseInput(series.name), parseInput(series.value))
+      const seriesData = vis.series.map(parseSeries).filter(x => x.length > 0)
+
       return (
         <FlexColumn key={i}>
           <FlexibleXYPlot height={600} xType="ordinal">
             <VerticalGridLines />
             <HorizontalGridLines />
-            <XAxis tickFormat={a => moment(a).format('MMM DD')}/>
+            <XAxis/>
             <YAxis/>
-            {seriesData.map(series => (
-              <LineSeries data={series}/>
+            {seriesData.map((series, j) => (
+              <LineSeries key={j} data={series}/>
             ))}
           </FlexibleXYPlot>
         </FlexColumn>
